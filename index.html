@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>a fullscreen browsing example by arrow keys</title>
+	<link href="https://fonts.googleapis.com/css?family=Noto+Sans+KR:700,900&display=swap&subset=korean" rel="stylesheet">
+	<style>
+		html{font-family: 'Noto Sans KR', sans-serif;}
+		body,h1,p,a,li,ul{margin:0; padding:0;}
+		body{overflow: hidden;}
+		.question{height:100vh; width:100%; position: absolute;			
+			line-height: 100vh;text-align: center; color:white;
+			font-size:5em; font-weight: 700;}
+		/* 아래키 눌렀을 때 아래서 위로 가는 애니메이션 - 지금것, 다음것 두가지 */
+		@keyframes btt{ from{top:100vh;} to{top:0vh; } }
+		@keyframes btt2{ from{top:0vh;} to{top:-100vh;} }
+		/* 위로키 눌렀을 때 위에서 아래로 가는 애니메이션 - 지금것, 다음것 두가지 */ 
+		@keyframes ttb{ from{top:0; } to{top:100vh; } }
+		@keyframes ttb2{ from{top:-100vh;} to{top:0vh; } }
+		/* 오른쪽키 눌렀을 때 우에서 좌로 가는 애니메이션 - 지금것, 다음것 두가지 */ 
+		@keyframes ltr{ from{left:0;}to{left:100%;} }
+		@keyframes ltr2{ from{left:-100%;}to{left:0%;} }
+		/* 왼쪽키 눌렀을 때 좌에서 우로 가는 애니메이션 - 지금것, 다음것 두가지 */ 
+		@keyframes rtl{ from{left:100%;}to{left:0%;} }
+		@keyframes rtl2{ from{left:0%;}to{left:-100%;} }
+	</style>
+</head>
+<body>
+	<!--첫장은 일단 그려줍니다 -->
+	<section id="now" class="question" style="opacity:1;background:black;top:0px;">
+		심리테스트를 시작합니다.
+	</section>
+
+	<!--스크립트 시작 -->
+	<script type="text/javascript">
+
+	//배열에 텍스트를 저장하기 때문에 순서에 사용할 변수
+	var secnum = -1;
+
+	//시작에서 오른쪽이나 아래키를 누르면 시작으로 바꾸어줌(이후 시작페이지 안나옴)
+	//시작했는지의 여부를 결정하는 변수
+	var start = false;
+		
+	//질문 배열에 저장;
+	var question = ["오늘은 어디로 여행을 갈까요?",
+			"날씨는 상쾌한가요?",
+			"최근에 기분이 상한일이 있나요?",
+			"당신은 무엇을 좋아하나요?",
+			"당신은 언제가 가장 인상깊었나요?",
+			"오늘은 어디로 여행을 갈까요?",
+			"날씨는 상쾌한가요?",
+			"최근에 기분이 상한일이 있나요?",
+			"당신은 무엇을 좋아하나요?",
+			"당신은 언제가 가장 인상깊었나요?"
+	];
+	//배경색 배열에 저장
+	var colorb = [
+			"red", "orange", "skyblue", "gray", "purple", 
+			"#0ff", "green", "blue", "navy", "black"
+	];
+
+
+	//키보드 이벤트로 해당키를 눌렀을때 keyCode로 값을 판별해서 해당하는
+	//newsection함수를 실행하며 방향값을 넘겨줍니다 next, prev, right, left 
+	document.onkeydown = function(e){
+		//키코드 한번 찍어보고
+		console.log(e.keyCode);
+
+		//만약 아래로가는 화살표키 눌렀으면
+		if(e.keyCode == 40){
+			//9번까지 왔으면 더이상 질문이 없으니까 더 가면 안됨
+			if(secnum < 9){
+				//다음 섹션순서를 위해 secnum을 하나 증가시킴
+				secnum ++;
+				//이제 섹션을 생성하는 함수실행!! 방향을 전달함(next) 
+				newsection("next"); 
+				//시작여부를 결정하는 start변수를 true로 만들자
+				start = true;}
+		}else if(e.keyCode == 38){
+			if(start){
+				if(secnum > 0){secnum --; newsection("prev");}
+			}
+		}else if(e.keyCode == 39){
+			if(secnum < 9){secnum ++; newsection("right"); start = true;}
+		}else if(e.keyCode == 37){
+			if(start){
+				if(secnum > 0){secnum --; newsection("left");}
+			}
+		}
+	}
+		
+	//새로운 섹션을 넣고 지금있는 섹션은 화면 밖으로 나가게 하고 지워줍니다 
+	//direction이라는 변수로 방향값을 받아옵니다.	
+	function newsection(direction){
+
+		//먼저 지금 있는 현재의 섹션사각형을을 p로 받아오자!
+		var p = document.getElementById("now");
+		
+		//방향키에 따라 적절한 애니메이션을 주어서 화면밖으로 사라지게 
+		if(direction == "next"){
+			p.style.animation = "btt2 0.5s ease-out forwards";	
+		}else if(direction == "prev"){
+			p.style.animation = "ttb 0.5s ease-out forwards";
+		}else if(direction == "right"){
+			p.style.animation = "rtl2 0.5s ease-out forwards";	
+		}else if(direction == "left"){
+			p.style.animation = "ltr 0.5s ease-out forwards";	
+		}
+		
+		//지금것이 화면밖으로 다 나갔으면 아예 지워버립니다.
+		p.addEventListener("animationend",function(){
+			var k = document.getElementById("now");
+			k.parentNode.removeChild(k);	
+		})
+		
+		//자 이번에는 화면으로 진입할 새로운 화면을 만듭니다.
+		var t = document.createElement("section");
+		//배경색은 배열에서 순서로 뽑아옵니다(현재순서가 secnum에 들어있음)
+		t.style.backgroundColor = colorb[secnum];
+		//그다음 클래스네임을 지정해서 스타일을 먹인다.
+		t.className = "question";
+		//이놈이 다시 현재의 화면이 되므로 id를 now로 세팅
+		t.id = "now";
+		//마지막으로 질문 배열에서 순서값으로 질문텍스트를 넣어준다.
+		t.innerHTML = question[secnum];
+
+		//바깥에서 새로운것이 진입하는 애니메이션을 시작!!
+		if(direction == "next"){
+			t.style.animation = "btt 0.5s ease-out forwards";
+		}else if(direction == "prev"){
+			t.style.animation = "ttb2 0.5s ease-out forwards";
+		}else if(direction == "right"){
+			t.style.animation = "rtl 0.5s ease-out forwards";
+		}else if(direction == "left"){
+			t.style.animation = "ltr2 0.5s ease-out forwards";
+		}
+		
+		//새로운 것을 달아줍니다. 아까 나간것은 지운것처럼.
+		document.body.appendChild(t);
+	}
+
+	</script>
+	
+</body>
+</html>
